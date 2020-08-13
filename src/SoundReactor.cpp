@@ -82,9 +82,9 @@ void react_sound(SoundReactorParams& params)
   
   for (int i = 0; i < params.leds_count; i++) 
   {
-    int red = -abs(2*(x-255))+255;
-    int green = -abs(2*x)+255;
-    int blue = -abs(2*(x-128))+255;
+    int red = 255 - abs(2*(x-255));
+    int green = 255 - abs(2*x);
+    int blue = 255 - abs(2*(x-128));
       
     if (red < 0) red = 0;
     if (green < 0) green = 0;

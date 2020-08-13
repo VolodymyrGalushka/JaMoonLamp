@@ -1,15 +1,12 @@
 #ifndef __PATTERNS_H__
 #define __PATTERNS_H__
 
+
+#include "global.h"
+
 #include <Arduino.h>
 #include <FastLED.h>
 
-struct Color
-{
-    byte red;
-    byte green;
-    byte blue;
-};
 
 struct PatternParams
 {

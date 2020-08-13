@@ -3,31 +3,29 @@
 
 #include <FastLED.h>
 
-struct ClapArgs
+struct ValueSet
 {
-    bool    double_clap{false};
-    bool    single_clap{false};
-    int     clap_count{0};
-    int     data_pin{};
-    int     clap_threshold{50};
-    int     doubleclap_threshold{400};
+    int v1;
+    int v2;
+    int v3;
 };
 
 enum class LightMode
 {
     White = 1,
     Color,
-    SoundReactive,
-    UV,
     Fire,
     FadeInOut,
     Sparkle,
-    MeteorRain
+    MeteorRain,
+    UV,
+    SoundReactive
 };
 
 
-void clap_detect(ClapArgs& args);
-
+void switch_detect();
+void switch_isr();
+void read_adjustings();
 
 void set_light(CRGB color);
 void light_off();
