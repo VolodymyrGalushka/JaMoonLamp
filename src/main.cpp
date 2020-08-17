@@ -9,9 +9,11 @@
 
 constexpr uint8_t led_pin = 7;
 constexpr uint8_t switch_pin = 3;
+constexpr uint8_t transistor_pin = 5;
 constexpr uint8_t v1_pin = A5;
 constexpr uint8_t v2_pin = A6;
 constexpr uint8_t v3_pin = A7;
+
 
 constexpr int led_count = 15;
 constexpr int modes_count = 8;
@@ -36,6 +38,8 @@ void setup()
     pinMode(v1_pin, INPUT);
     pinMode(v2_pin, INPUT);
     pinMode(v3_pin, INPUT);
+
+    pinMode(transistor_pin, OUTPUT);
 
     s_params.data_pin = A0;
     s_params.leds = leds;
@@ -84,6 +88,7 @@ void loop()
         //de-init other modes
         if(s_params.reactor_initialized)
           deinit_reactor(s_params);
+        uv_toggle(false);
         set_light(CRGB::White);
       }
       break;
@@ -92,6 +97,8 @@ void loop()
       {
         if(s_params.reactor_initialized)
           deinit_reactor(s_params);
+        uv_toggle(false);
+
         user_light.red = map(adjust_values.v1, 0, 1024, 0, 255);
         user_light.green = map(adjust_values.v2, 0, 1024, 0, 255);
         user_light.blue = map(adjust_values.v3, 0, 1024, 0, 255);
@@ -106,6 +113,7 @@ void loop()
       {
         if(s_params.reactor_initialized)
             deinit_reactor(s_params);
+        uv_toggle(false);
         patterns->fire(adjust_values.v1, adjust_values.v2, adjust_values.v3);
       }
       break;
@@ -114,6 +122,7 @@ void loop()
       {
       if(s_params.reactor_initialized)
             deinit_reactor(s_params);
+      uv_toggle(false);
       patterns->fadeInOut(user_light);
       }
       break;
@@ -122,6 +131,7 @@ void loop()
       {
         if(s_params.reactor_initialized)
             deinit_reactor(s_params);
+        uv_toggle(false);
         auto m_size = map(adjust_values.v1, 0, 1024, 0, 255);
         auto m_trail = map(adjust_values.v2, 0, 1024, 0, 255);
         auto speed_delay = map(adjust_values.v3, 0, 1024, 0, 255);
@@ -133,13 +143,16 @@ void loop()
       {
         if(s_params.reactor_initialized)
             deinit_reactor(s_params);
-      patterns->snowSparkle(user_light, adjust_values.v1, adjust_values.v2);
+        uv_toggle(false);
+        patterns->snowSparkle(user_light, adjust_values.v1, adjust_values.v2);
       }
       break;
 
       case LightMode::UV:
       {
-
+          if(s_params.reactor_initialized)
+            deinit_reactor(s_params);
+          uv_toggle(true);
       }
       break;
 
@@ -148,6 +161,7 @@ void loop()
       {
         if(!s_params.reactor_initialized)
           init_reactor(s_params);
+        uv_toggle(false);
         react_sound(s_params);
       }
       break;
@@ -230,4 +244,16 @@ void read_adjustings()
     adjust_values.v1 = analogRead(v1_pin);
     adjust_values.v2 = analogRead(v2_pin);
     adjust_values.v3 = analogRead(v3_pin);
+}
+
+void uv_toggle(bool on) 
+{
+  if(on)
+  {
+    digitalWrite(transistor_pin, HIGH);
+  }
+  else
+  {
+    digitalWrite(transistor_pin, LOW);
+  }
 }

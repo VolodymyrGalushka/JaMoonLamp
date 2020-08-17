@@ -26,6 +26,7 @@ enum class LightMode
 void switch_detect();
 void switch_isr();
 void read_adjustings();
+void uv_toggle(bool on);
 
 void set_light(CRGB color);
 void light_off();
