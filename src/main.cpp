@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include <FastLED.h>
+#include <EEPROM.h>
 
 #define GLOBAL_DELAY 20
 
@@ -18,22 +19,31 @@ constexpr uint8_t v3_pin = A7;
 constexpr int led_count = 15;
 constexpr int modes_count = 8;
 
+constexpr int light_mode_addr{0x00};
 
-SoundReactorParams s_params;
-LightMode current_light_mode{LightMode::White};
-CRGB leds[led_count];
-bool light_on{false};
-Patterns *patterns{nullptr};
-Color user_light;
-ValueSet adjust_values{0,0,0};
-bool switch_mode{false};
-uint64_t lastDebounceTime = 0;  // the last time the output pin was toggled
-uint64_t debounceDelay = 50;    // the debounce time; increase if the output flickers
+SoundReactorParams    s_params;
+LightMode             current_light_mode{LightMode::White};
+CRGB                  leds[led_count];
+bool                  light_on{false};
+Patterns*             patterns{nullptr};
+Color                 user_light;
+ValueSet              adjust_values{0,0,0};
+
+bool                  switch_mode{false};
+uint64_t              last_switch_time{0};
+uint64_t              save_mode_delay{100*30};
+bool                  mode_saved{true};
+
+int                   last_switch_state = HIGH;
+int                   switch_state;
+uint64_t              lastDebounceTime = 0;  // the last time the output pin was toggled
+uint64_t              debounceDelay = 100;    // the debounce time; increase if the output flickers
+
 
 void setup() 
 {
     pinMode(switch_pin, INPUT);
-    attachInterrupt(digitalPinToInterrupt(switch_pin), switch_isr, CHANGE);
+    // attachInterrupt(digitalPinToInterrupt(switch_pin), switch_isr, FALLING);
 
     pinMode(v1_pin, INPUT);
     pinMode(v2_pin, INPUT);
@@ -54,7 +64,7 @@ void setup()
 
     FastLED.addLeds<WS2812B, led_pin>(leds, led_count);
 
-   
+    //load_mode();
 
     Serial.begin(9600);
 }
@@ -62,7 +72,7 @@ void setup()
 void loop() 
 {
 
-  // switch_detect();
+  switch_detect();
 
   if(!s_params.reactor_initialized)
   {
@@ -70,15 +80,23 @@ void loop()
   }
  
 
-
   //Serial.println("Current mode: ");
   //Serial.println((int)current_light_mode);
 
   if(switch_mode)
   {
     current_light_mode = static_cast<LightMode>( (int)current_light_mode % modes_count + 1);
-    //TODO: save into EEPROM
+    last_switch_time = millis();
+    mode_saved = false;
     switch_mode = false;
+  }
+
+  if(!mode_saved)
+  {
+      if((millis() - last_switch_time) > save_mode_delay)
+      {
+          //save_mode();
+      }
   }
 
   switch (current_light_mode)
@@ -200,12 +218,29 @@ void light_off()
     }
 }
 
-//TODO: add debounce
+void save_mode() 
+{
+    EEPROM.put(light_mode_addr, current_light_mode);
+    mode_saved = true;
+}
+
+void load_mode() 
+{
+    LightMode mode{LightMode::White};
+    EEPROM.get(light_mode_addr, mode);
+    auto mode_val = static_cast<int>(mode);
+    if(mode_val >= 1 && mode_val <= 8)
+      current_light_mode = mode;
+}
+
+
 void switch_detect() 
 {
-   static int last_switch_state = LOW;
-   static int switch_state;
-   auto reading = digitalRead(switch_pin);
+  auto reading = digitalRead(switch_pin);
+
+  Serial.print("Reading: " );
+  Serial.print(reading);
+  Serial.println();
 
   // If the switch changed, due to noise or pressing:
   if (reading != last_switch_state) 
@@ -221,7 +256,7 @@ void switch_detect()
         switch_state = reading;
 
       // only toggle the LED if the new button state is HIGH
-      if (switch_state == HIGH) 
+      if (switch_state == LOW) 
       {
         switch_mode = true;
       }
@@ -234,6 +269,11 @@ void switch_detect()
 
 void switch_isr()
 {
+  auto reading = digitalRead(switch_pin);
+
+  Serial.print("Reading: " );
+  Serial.print(reading);
+  Serial.println();
   if ((millis() - lastDebounceTime) > debounceDelay) 
     switch_mode = true;
   lastDebounceTime = millis();

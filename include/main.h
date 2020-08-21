@@ -31,5 +31,8 @@ void uv_toggle(bool on);
 void set_light(CRGB color);
 void light_off();
 
+void save_mode();
+void load_mode();
+
 
 #endif // __MAIN_H__
