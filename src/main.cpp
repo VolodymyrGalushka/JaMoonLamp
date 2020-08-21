@@ -89,6 +89,8 @@ void loop()
     last_switch_time = millis();
     mode_saved = false;
     switch_mode = false;
+    Serial.print("Current mode: ");
+    Serial.print(int(current_light_mode));
   }
 
   if(!mode_saved)
@@ -126,6 +128,7 @@ void loop()
         c.blue = user_light.blue;
         set_light(c);
       }
+      break;
 
       case LightMode::Fire:
       {
@@ -170,6 +173,7 @@ void loop()
       {
           if(s_params.reactor_initialized)
             deinit_reactor(s_params);
+          light_off();
           uv_toggle(true);
       }
       break;
@@ -194,7 +198,9 @@ void loop()
 
 void set_light(CRGB color) 
 {
-    if(!light_on)
+    static CRGB last_c;
+
+    if(!light_on || (last_c.red != color.red) || last_c.blue != color.blue || last_c.green != color.green)
     {
       for(int i = 0; i < led_count; ++i)
       {
@@ -202,6 +208,7 @@ void set_light(CRGB color)
       } 
       FastLED.show();
       light_on = true;
+      last_c = color;
     }
 }
 
@@ -238,9 +245,9 @@ void switch_detect()
 {
   auto reading = digitalRead(switch_pin);
 
-  Serial.print("Reading: " );
-  Serial.print(reading);
-  Serial.println();
+  // Serial.print("Reading: " );
+  // Serial.print(reading);
+  // Serial.println();
 
   // If the switch changed, due to noise or pressing:
   if (reading != last_switch_state) 

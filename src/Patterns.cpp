@@ -121,7 +121,7 @@ void Patterns::fire(int Cooling, int Sparking, int SpeedDelay)
   {
     cooldown = random(0, ((Cooling * 10) / this->m_patternParams.led_count) + 2);
     
-    if(cooldown>m_heat[i]) 
+    if(cooldown > m_heat[i]) 
     {
       m_heat[i]=0;
     } else 
