@@ -14,12 +14,12 @@ enum class LightMode
 {
     White = 1,
     Color,
+    UV,
     Fire,
-    FadeInOut,
     Sparkle,
     MeteorRain,
-    UV,
-    SoundReactive
+    SoundReactive,
+    FadeInOut
 };
 
 

@@ -10,10 +10,10 @@
 
 constexpr uint8_t led_pin = 7;
 constexpr uint8_t switch_pin = 3;
-constexpr uint8_t transistor_pin = 5;
-constexpr uint8_t v1_pin = A5;
-constexpr uint8_t v2_pin = A6;
-constexpr uint8_t v3_pin = A7;
+constexpr uint8_t transistor_pin = 10;
+constexpr uint8_t v1_pin = A2;
+constexpr uint8_t v2_pin = A4;
+constexpr uint8_t v3_pin = A6;
 
 
 constexpr int led_count = 15;
@@ -31,7 +31,7 @@ ValueSet              adjust_values{0,0,0};
 
 bool                  switch_mode{false};
 uint64_t              last_switch_time{0};
-uint64_t              save_mode_delay{100*30};
+uint64_t              save_mode_delay{1000*30};
 bool                  mode_saved{true};
 
 int                   last_switch_state = HIGH;
@@ -64,7 +64,7 @@ void setup()
 
     FastLED.addLeds<WS2812B, led_pin>(leds, led_count);
 
-    //load_mode();
+    load_mode();
 
     Serial.begin(9600);
 }
@@ -80,8 +80,8 @@ void loop()
   }
  
 
-  //Serial.println("Current mode: ");
-  //Serial.println((int)current_light_mode);
+  Serial.println("Current mode: ");
+  Serial.println((int)current_light_mode);
 
   if(switch_mode)
   {
@@ -97,7 +97,7 @@ void loop()
   {
       if((millis() - last_switch_time) > save_mode_delay)
       {
-          //save_mode();
+          save_mode();
       }
   }
 
@@ -109,7 +109,12 @@ void loop()
         if(s_params.reactor_initialized)
           deinit_reactor(s_params);
         uv_toggle(false);
-        set_light(CRGB::White);
+        //warm white
+        CRGB c;
+        c.red = 255;
+        c.green = 128;
+        c.blue = 0;
+        set_light(c);
       }
       break;
       
@@ -181,6 +186,7 @@ void loop()
     
       case LightMode::SoundReactive:
       {
+        s_params.color = user_light;
         if(!s_params.reactor_initialized)
           init_reactor(s_params);
         uv_toggle(false);
