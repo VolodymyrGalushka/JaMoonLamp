@@ -8,7 +8,7 @@
 
 #define GLOBAL_DELAY 20
 
-constexpr uint8_t led_pin = 7;
+constexpr uint8_t led_pin = 6;
 constexpr uint8_t switch_pin = 3;
 constexpr uint8_t transistor_pin = 10;
 constexpr uint8_t v1_pin = A2;

@@ -20,7 +20,7 @@ RegisterState r_state;
 const uint16_t samples = 64;
 // const uint16_t num_pixels = 60;
 const uint8_t loop_num = 1;
-const uint16_t sound_thresh = 25;
+const uint16_t sound_thresh = 10;
 
 arduinoFFT FFT = arduinoFFT();
 double vReal[samples];
