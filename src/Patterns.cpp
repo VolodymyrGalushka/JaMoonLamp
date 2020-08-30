@@ -203,8 +203,8 @@ void Patterns::setPixel(int Pixel, Color c)
  #endif
  #ifndef ADAFRUIT_NEOPIXEL_H 
    // FastLED
-   this->m_patternParams.leds[Pixel].r = c.red;
-   this->m_patternParams.leds[Pixel].g = c.green;
+   this->m_patternParams.leds[Pixel].r = c.green;
+   this->m_patternParams.leds[Pixel].g = c.red;
    this->m_patternParams.leds[Pixel].b = c.blue;
  #endif
 }

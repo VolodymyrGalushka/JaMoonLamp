@@ -111,9 +111,9 @@ void loop()
         uv_toggle(false);
         //warm white
         CRGB c;
-        c.red = 255;
-        c.green = 128;
-        c.blue = 0;
+        c.green = 244; // red
+        c.red = 164; // green
+        c.blue = 96;
         set_light(c);
       }
       break;
