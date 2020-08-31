@@ -20,6 +20,7 @@ constexpr int led_count = 15;
 constexpr int modes_count = 8;
 
 constexpr int light_mode_addr{0x00};
+constexpr int user_light_addr{0x80};
 
 SoundReactorParams    s_params;
 LightMode             current_light_mode{LightMode::White};
@@ -27,6 +28,7 @@ CRGB                  leds[led_count];
 bool                  light_on{false};
 Patterns*             patterns{nullptr};
 Color                 user_light;
+bool                  user_light_saved{true};
 ValueSet              adjust_values{0,0,0};
 
 bool                  switch_mode{false};
@@ -64,7 +66,12 @@ void setup()
 
     FastLED.addLeds<WS2812B, led_pin>(leds, led_count);
 
+    user_light.red = map(adjust_values.v1, 0, 1024, 0, 255);
+    user_light.green = map(adjust_values.v2, 0, 1024, 0, 255);
+    user_light.blue = map(adjust_values.v3, 0, 1024, 0, 255);
+
     load_mode();
+    load_user_light();
 
     Serial.begin(9600);
 }
@@ -98,6 +105,7 @@ void loop()
       if((millis() - last_switch_time) > save_mode_delay)
       {
           save_mode();
+          save_user_light();
       }
   }
 
@@ -123,7 +131,6 @@ void loop()
         if(s_params.reactor_initialized)
           deinit_reactor(s_params);
         uv_toggle(false);
-
         user_light.red = map(adjust_values.v1, 0, 1024, 0, 255);
         user_light.green = map(adjust_values.v2, 0, 1024, 0, 255);
         user_light.blue = map(adjust_values.v3, 0, 1024, 0, 255);
@@ -245,6 +252,20 @@ void load_mode()
     if(mode_val >= 1 && mode_val <= 8)
       current_light_mode = mode;
 }
+
+void save_user_light() 
+{
+    EEPROM.put(user_light_addr, user_light);
+}
+
+void load_user_light() 
+{
+    Color light;
+    EEPROM.get(user_light_addr, light);
+    user_light.red = light.red;
+    user_light.green = light.green;
+    user_light.blue = light.blue;
+} 
 
 
 void switch_detect() 
