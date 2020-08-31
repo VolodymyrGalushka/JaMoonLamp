@@ -34,5 +34,8 @@ void light_off();
 void save_mode();
 void load_mode();
 
+void save_user_light();
+void load_user_light();
+
 
 #endif // __MAIN_H__
